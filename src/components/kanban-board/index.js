@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "./index.css";
 
 const stagesNames = ['Backlog', 'To Do', 'Ongoing', 'Done'];
@@ -14,7 +14,7 @@ function KanbanBoard() {
     { name: 'task7', stage: 3 },
     { name: 'task8', stage: 3 }
   ]);
-
+  const [newTask, setNewTask] = useState();
   let stagesTasks = [];
   for (let i = 0; i < stagesNames.length; ++i) {
     stagesTasks.push([]);
@@ -24,11 +24,52 @@ function KanbanBoard() {
     stagesTasks[stageId].push(task);
   }
 
+  const forwordAction = (task) => () => {   // Done By Prateek Kushwaha
+    if (task.stage < 3) {
+      let arr = [...tasks];
+      let i = arr.findIndex(item => item.name == task.name)
+      arr[i].stage = arr[i].stage + 1
+      setTasks(arr)
+    }
+  }
+
+  const backwordAction = (task) => () => {  // Done By Prateek Kushwaha
+    if (task.stage > 0) {
+      let arr = [...tasks];
+      let i = arr.findIndex(item => item.name == task.name)
+      arr[i].stage = arr[i].stage - 1
+      setTasks(arr)
+    }
+  }
+
+  const deleteAction = (task) => () => { // Done By Prateek Kushwaha
+    let arr = [...tasks];
+    let i = arr.findIndex(item => item.name == task.name)
+    arr.splice(i, 1);
+    setTasks(arr)
+  }
+
+  const onChangeTask = (e) => {
+    setNewTask(e.target.value)
+  }
+
+  const addTaskToBacklog = () => { // Done By Prateek Kushwaha
+    let arr = [...tasks]
+    if (!(arr.findIndex(item => item.name.toLocaleLowerCase() == newTask.toLocaleLowerCase()) + 1)) {
+      arr.push({ name: newTask, stage: 0 })
+      setTasks(arr);
+      setNewTask("")
+    } else {
+      alert("Task already exist")
+    }
+  }
 
   return (
     <div className="mt-20 layout-column justify-content-center align-items-center">
       <section className="mt-50 layout-row align-items-center justify-content-center">
         <input
+          value={newTask}
+          onChange={(e) => onChangeTask(e)}
           id="create-task-input"
           type="text"
           className="large"
@@ -36,6 +77,7 @@ function KanbanBoard() {
           data-testid="create-task-input"
         />
         <button
+          onClick={addTaskToBacklog}
           type="submit"
           className="ml-30"
           data-testid="create-task-button"
@@ -57,18 +99,21 @@ function KanbanBoard() {
                         <span data-testid={`${task.name.split(' ').join('-')}-name`}>{task.name}</span>
                         <div className="icons">
                           <button
+                            onClick={backwordAction(task)}
                             className="icon-only x-small mx-2"
                             data-testid={`${task.name.split(' ').join('-')}-back`}
                           >
                             <i className="material-icons">arrow_back</i>
                           </button>
                           <button
+                            onClick={forwordAction(task)}
                             className="icon-only x-small mx-2"
                             data-testid={`${task.name.split(' ').join('-')}-forward`}
                           >
                             <i className="material-icons">arrow_forward</i>
                           </button>
                           <button
+                            onClick={deleteAction(task)}
                             className="icon-only danger x-small mx-2"
                             data-testid={`${task.name.split(' ').join('-')}-delete`}
                           >
